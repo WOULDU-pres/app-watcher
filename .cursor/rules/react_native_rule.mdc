@@ -110,7 +110,7 @@ README.md
 
 #### **React Native Paper** (1순위 - 권장)
 ```bash
-npm install react-native-paper react-native-safe-area-context
+yarn add react-native-paper react-native-safe-area-context
 ```
 - **장점**: Material Design 3.0 완벽 지원, Android 최적화, Trust Score 10/10
 - **특징**: Babel 플러그인으로 번들 사이즈 최적화, 다크모드 지원
@@ -123,7 +123,7 @@ import { Button, Card, Text } from 'react-native-paper';
 
 #### **React Native UI Kitten** (2순위)
 ```bash
-npm install @ui-kitten/components @eva-design/eva react-native-svg
+yarn add @ui-kitten/components @eva-design/eva react-native-svg
 ```
 - **장점**: Eva Design System, RTL 지원, TypeScript 친화적
 - **특징**: 20+ 컴포넌트, 테마 시스템 우수
@@ -222,3 +222,135 @@ npm install @ui-kitten/components @eva-design/eva react-native-svg
 - **접근성**: ARIA 속성 및 접근성 고려
 - **에러 처리**: ErrorBoundary 활용
 - **코드 품질**: ESLint, Prettier 준수
+
+---
+
+## [OpenKakao Watcher] 앱 플로우 및 화면/폴더 구조 규칙 (2024.06 추가)
+
+### 1. 전체 사용자 플로우
+- (로그인/인증) → 대시보드(탭) → [알림상세] or [설정] or [운영대시보드]
+- 하단 탭: 대시보드 | 알림 | 설정 | 운영
+
+```mermaid
+flowchart TD
+    Login["로그인/인증"] --> Dashboard["대시보드(메인)"]
+    Dashboard --> Alerts["알림/이벤트 상세"]
+    Dashboard --> Settings["설정"]
+    Dashboard --> Admin["운영/비용 대시보드"]
+    Alerts --> Dashboard
+    Settings --> Dashboard
+    Admin --> Dashboard
+```
+
+### 2. 폴더/파일 구조 예시
+```
+src/
+  app/
+    (tabs)/
+      index.tsx            # 대시보드(메인)
+      alerts.tsx           # 알림/이벤트 탭
+      settings.tsx         # 설정 탭
+      admin.tsx            # 운영/비용 대시보드 탭
+      _layout.tsx
+    +not-found.tsx
+  screens/
+    DashboardScreen/
+      index.tsx
+      styles.ts
+    AlertDetailScreen/
+      index.tsx
+      styles.ts
+    SettingsScreen/
+      index.tsx
+      styles.ts
+    AdminDashboardScreen/
+      index.tsx
+      styles.ts
+  components/
+    Card/
+      index.tsx
+      styles.ts
+    List/
+      index.tsx
+      styles.ts
+    AlertItem/
+      index.tsx
+      styles.ts
+    RoomItem/
+      index.tsx
+      styles.ts
+    StatCard/
+      index.tsx
+      styles.ts
+  services/
+    api/
+      client.ts
+      types.ts
+    NotificationService.ts
+    AuthService.ts
+  store/
+    RootStore.ts
+    UserStore.ts
+    models/
+      User.ts
+  theme/
+    colors.ts
+    spacing.ts
+    typography.ts
+    index.ts
+  config/
+    config.ts
+  i18n/
+    en.ts
+    ko.ts
+    index.ts
+  utils/
+    storage/
+      storage.ts
+    constants.ts
+    helpers.ts
+assets/
+  images/
+  icons/
+  fonts/
+```
+
+### 3. 각 화면별 주요 UI 요소 및 Paper 컴포넌트 설계안
+
+#### [대시보드(메인)]
+- <Card> : 실시간 감지 현황, 통계
+- <List> : 최근 감지 메시지 리스트
+- <Button> : 감시방 추가, 알림채널 설정 진입
+- <Text> : 상태, 안내, 통계
+- <Avatar> : 방/관리자 아이콘
+- <ProgressBar> : 감지율, API 사용량 등
+
+#### [알림/이벤트 상세]
+- <Card> : 감지 메시지 상세
+- <Text> : 메시지 원문, 분류, 시간, 방 정보
+- <Button> : 화이트리스트 추가, 무시, 확인
+- <Chip> : 분류(도배/광고/욕설/공고 등)
+- <Divider> : 구분선
+
+#### [설정]
+- <List> : 감시방/알림채널/화이트리스트 관리
+- <Switch> : 알림 on/off, 보안 옵션
+- <TextInput> : 예외 단어, 방 이름 등 입력
+- <Button> : 저장, 추가, 삭제
+
+#### [운영/비용 대시보드]
+- <Card> : 월별 API 사용량, 경보 바이패스
+- <List> : 로그, 테스트 모드 내역
+- <ProgressBar> : 사용량 시각화
+- <Text> : 안내, 통계
+
+### 4. 각 컴포넌트 역할 및 props 예시
+- Card: title, content, icon, status
+- List: items, onItemPress
+- AlertItem: message, type, time, onAction
+- RoomItem: roomName, memberCount, onRemove
+- StatCard: label, value, icon
+- Button: mode, onPress, children
+- Chip: label, selected, onPress
+- ProgressBar: progress, color
+- TextInput: value, onChangeText, placeholder
