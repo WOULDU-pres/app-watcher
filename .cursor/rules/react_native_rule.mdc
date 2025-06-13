@@ -1,0 +1,224 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Cursor Rule for React Native + Expo Router + Ignite CLI
+
+## 1. Language & Formatting
+- Language: TypeScript
+- Indentation: 4 spaces
+- Max line length: 100
+- Quotes: single
+- Semicolons: always
+- Trailing commas: always
+- Import order: built-in → external → internal → parent → sibling → index
+
+---
+
+## 2. 프로젝트 폴더 구조 (Expo Router 기반)
+
+```
+src/
+  app/                      # Expo Router 파일 기반 라우팅
+    _layout.tsx            # Root layout (공통 설정, 네비게이션)
+    index.tsx              # 홈 화면 (/)
+    notification-setup.tsx # 알림 설정 화면 (/notification-setup)
+    (auth)/               # Auth 그룹 (로그인 관련 화면들)
+      _layout.tsx         # Auth layout
+      login.tsx           # 로그인 화면 (/auth/login)
+      register.tsx        # 회원가입 화면 (/auth/register)
+    [id].tsx              # 동적 라우팅 (예: /user/123)
+    +not-found.tsx        # 404 페이지
+
+  components/              # 재사용 가능한 UI 컴포넌트
+    Button/
+      index.tsx
+      styles.ts
+    TextField/
+      index.tsx
+      styles.ts
+    Screen/
+      index.tsx
+      styles.ts
+    Card/
+      index.tsx
+      styles.ts
+    Text/
+      index.tsx
+      styles.ts
+    // 모든 컴포넌트는 개별 폴더 구조 필수
+
+  screens/                 # 복잡한 화면 로직 (Expo Router와 분리)
+    HomeScreen/            # 선택적: 복잡한 로직을 분리할 때만 사용
+      index.tsx
+      styles.ts
+
+  services/                # API 통신, 비즈니스 로직
+    api/
+      client.ts
+      types.ts
+    NotificationService.ts
+    AuthService.ts
+
+  store/                   # 전역 상태관리 (MobX State Tree)
+    RootStore.ts
+    UserStore.ts
+    models/
+      User.ts
+
+  hooks/                   # 커스텀 React Hooks
+    useAuth.ts
+    useNotifications.ts
+    useLocalSearchParams.ts
+
+  utils/                   # 공통 유틸리티
+    storage/
+      storage.ts
+    constants.ts
+    helpers.ts
+
+  theme/                   # 스타일링 시스템
+    colors.ts
+    spacing.ts
+    typography.ts
+    index.ts
+
+  config/                  # 앱 설정
+    config.ts
+
+  i18n/                    # 다국어 지원
+    en.ts
+    ko.ts
+    index.ts
+
+assets/                    # 정적 파일
+  images/
+  icons/
+  fonts/
+
+app.json                   # Expo 설정
+app.config.ts             # 동적 Expo 설정
+package.json
+README.md
+```
+---
+
+## 3. UI 라이브러리 및 개발 속도 향상
+
+### 3.1 주요 UI 라이브러리 선택 (우선순위 순)
+
+#### **React Native Paper** (1순위 - 권장)
+```bash
+npm install react-native-paper react-native-safe-area-context
+```
+- **장점**: Material Design 3.0 완벽 지원, Android 최적화, Trust Score 10/10
+- **특징**: Babel 플러그인으로 번들 사이즈 최적화, 다크모드 지원
+- **사용법**: PaperProvider로 앱 래핑 필수
+
+```tsx
+import { PaperProvider } from 'react-native-paper';
+import { Button, Card, Text } from 'react-native-paper';
+```
+
+#### **React Native UI Kitten** (2순위)
+```bash
+npm install @ui-kitten/components @eva-design/eva react-native-svg
+```
+- **장점**: Eva Design System, RTL 지원, TypeScript 친화적
+- **특징**: 20+ 컴포넌트, 테마 시스템 우수
+- **사용법**: ApplicationProvider 필요
+
+#### **기타 고려사항**
+- **Gluestack UI**: Tailwind CSS 스타일링 선호 시
+- **Tamagui**: 성능 최적화가 중요한 프로젝트
+- **React Native Elements**: 초보자 친화적, 높은 자유도
+
+### 3.2 UI 라이브러리 사용 원칙
+- **우선순위**: Paper > Custom Components > 다른 라이브러리
+- **일관성**: 한 프로젝트에는 하나의 주요 UI 라이브러리만 사용
+- **커스터마이징**: 기본 컴포넌트 확장 시 wrapper 컴포넌트 생성
+- **스타일링**: 라이브러리 테마 시스템 활용, 인라인 스타일 금지
+
+---
+
+## 4. Expo Router 특화 규칙
+
+### 4.1 라우팅 패턴
+- **파일 기반 라우팅**: `src/app/` 폴더의 파일 구조가 URL 구조와 직접 연결
+- **Layout 시스템**: `_layout.tsx`로 공통 레이아웃 정의
+- **그룹 라우팅**: `(groupName)/`으로 관련 화면들 그룹화
+- **동적 라우팅**: `[param].tsx`로 동적 매개변수 처리
+
+### 4.2 네비게이션
+- **Expo Router 네비게이션**: `useRouter()`, `<Link>` 컴포넌트 사용
+- **매개변수 접근**: `useLocalSearchParams()` 훅 사용
+- **타입 안전성**: `expo-router`의 typedRoutes 활용
+
+---
+
+## 5. 컴포넌트/화면 개발 규칙
+
+- **모든 UI 컴포넌트는 개별 폴더로 분리 (필수)**
+  - 내부에 반드시 `index.tsx`와 `styles.ts` 파일 포함
+  - (예시: `components/Button/index.tsx`, `components/Button/styles.ts`)
+
+- **Expo Router 화면들**
+  - `src/app/` 내의 화면은 단일 파일로 작성 가능
+  - 복잡한 로직은 `src/screens/`로 분리하여 조합
+
+- **UI 라이브러리 컴포넌트 확장**
+  - Paper 컴포넌트 커스터마이징 시 wrapper 생성
+  - 기본 스타일링은 라이브러리 테마 시스템 활용
+  - 추가 스타일링만 `styles.ts`에 분리
+
+- **타입 정의**
+  - 모든 props는 interface로 정의
+  - Expo Router의 타입 시스템 활용
+
+---
+
+## 6. 상태 관리
+- **MobX State Tree** 사용 (`src/store/`)
+- **로컬 상태**: React Hooks 우선 사용
+- **전역 상태**: 꼭 필요한 경우만 MobX Store 활용
+
+---
+
+## 7. API 및 비즈니스 로직
+- 모든 API 호출/비즈니스 로직은 `src/services/`에만 작성
+- **API 클라이언트**: fetch 또는 axios 사용
+- **타입 안전성**: API 응답 타입 정의 필수
+
+---
+
+## 8. 스타일링
+- **UI 라이브러리 우선**: React Native Paper의 테마 시스템 활용
+- **ThemedStyle 시스템**: 현재 프로젝트의 기존 테마와 병행 사용
+- **인라인 스타일 금지**
+- **스타일 분리**: 반드시 `styles.ts` 파일로 분리
+- **일관성**: theme의 colors, spacing, typography 활용
+
+---
+
+## 9. Expo 특화 기능
+- **Expo SDK 활용**: notifications, secure-store, file-system 등
+- **네이티브 기능**: 플랫폼별 구현 시 `.android.ts`, `.ios.ts` 확장자 활용
+- **환경 설정**: `app.json`과 `app.config.ts` 조합 사용
+
+---
+
+## 10. 개발 도구
+- **Expo CLI**: 개발 서버 실행 및 빌드
+- **Expo Go**: 개발 중 테스트 (Android 전용)
+- **EAS Build**: 프로덕션 빌드
+
+---
+
+## 11. 기타 원칙
+- **Android 최적화**: 웹 지원 제거, Android 전용 최적화
+- **타입 안전성**: 모든 컴포넌트, 함수에 타입 정의
+- **성능**: 불필요한 리렌더링 방지, memo 활용
+- **접근성**: ARIA 속성 및 접근성 고려
+- **에러 처리**: ErrorBoundary 활용
+- **코드 품질**: ESLint, Prettier 준수
